@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<messages>
+
+    <message>
+        <id>1</id>
+        <type>START</type>
+        <txt>Добрий день! Ми дуже раді вас бачити в нашому боті для ЗМІ !</txt>
+    </message>
+
+    <message>
+        <id>2</id>
+        <type>GOOD_DAY</type>
+        <txt>Слава Україні !</txt>
+    </message>
+
+    <message>
+        <id>3</id>
+        <type>SELECT</type>
+        <txt>Дякую за ваш вибір. Слава Україні !</txt>
+    </message>
+
+    <message>
+        <id>4</id>
+        <type>MEDIA</type>
+        <txt>📰 Напишіть назву медіа.</txt>
+    </message>
+
+    <message>
+        <id>5</id>
+        <type>NAME_SURNAME</type>
+        <txt>👤 Напишіть ваші ім'я та прізвище.</txt>
+    </message>
+
+    <message>
+        <id>6</id>
+        <type>PHONE</type>
+        <txt>🔢 Напишіть номер телефону у форматі +380XX XXX XX XX.</txt>
+    </message>
+
+    <message>
+        <id>7</id>
+        <type>EMAIL</type>
+        <txt>📧 Напишіть email-адресу.</txt>
+    </message>
+
+    <message>
+        <id>8</id>
+        <type>SUBJECT</type>
+        <txt>❓ Напишіть тему запиту і перелік питань.</txt>
+    </message>
+
+    <message>
+        <id>9</id>
+        <type>WE_CONTACT</type>
+        <txt>✅ Готово! Ми зв'яжемося з вами сьогодні-завтра для уточнення деталей і термінів підготовки відповіді. Героям слава!</txt>
+    </message>
+
+    <message>
+        <id>10</id>
+        <type>END</type>
+        <txt>На все добре.</txt>
+    </message>
+
+    <message>
+        <id>11</id>
+        <type>ERROR</type>
+        <txt>ERROR</txt>
+    </message>
+
+    <message>
+        <id>12</id>
+        <type>PIAR_UNIT</type>
+        <txt>Нове звернення ЗМІ : </txt>
+    </message>
+
+</messages>

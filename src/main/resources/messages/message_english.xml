@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<messages>
+
+    <message>
+        <id>1</id>
+        <type>START</type>
+        <txt>Hello! This chatbot was created especially for media to get comments from Ukrposhta!</txt>
+    </message>
+
+    <message>
+        <id>2</id>
+        <type>GOOD_DAY</type>
+        <txt>Glory to Ukraine!</txt>
+    </message>
+
+    <message>
+        <id>3</id>
+        <type>SELECT</type>
+        <txt>Thank you for your choice. Glory to Ukraine!</txt>
+    </message>
+
+    <message>
+        <id>4</id>
+        <type>MEDIA</type>
+        <txt>📰 Write the name of the media, please .</txt>
+    </message>
+
+    <message>
+        <id>5</id>
+        <type>NAME_SURNAME</type>
+        <txt>👤 Write your name and surname, please.</txt>
+    </message>
+
+    <message>
+        <id>6</id>
+        <type>PHONE</type>
+        <txt>🔢 Write your telephone number as +380XX XXX XX XX, please.</txt>
+    </message>
+
+    <message>
+        <id>7</id>
+        <type>EMAIL</type>
+        <txt>📧 Please, give us your email address.</txt>
+    </message>
+
+    <message>
+        <id>8</id>
+        <type>SUBJECT</type>
+        <txt>❓ Good. We’re looking forward to your questions. Write them below, please .</txt>
+    </message>
+
+    <message>
+        <id>9</id>
+        <type>WE_CONTACT</type>
+        <txt>✅ Done! Thank you for request! We will contact you soon to clarify the details. Glory to Ukraine!</txt>
+    </message>
+
+    <message>
+        <id>10</id>
+        <type>END</type>
+        <txt>Goodbye!</txt>
+    </message>
+
+    <message>
+        <id>11</id>
+        <type>ERROR</type>
+        <txt>ERROR</txt>
+    </message>
+
+    <message>
+        <id>12</id>
+        <type>PIAR_UNIT</type>
+        <txt>New media appeal : </txt>
+    </message>
+
+</messages>

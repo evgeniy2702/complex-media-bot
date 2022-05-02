@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<buttons>
+    <button>
+        <id>1</id>
+        <type>START</type>
+        <txt>START</txt>
+    </button>
+
+    <button>
+        <id>2</id>
+        <type>REQUEST</type>
+        <txt>Submit a request.</txt>
+    </button>
+
+    <button>
+        <id>3</id>
+        <type>REPEAT_REQUEST</type>
+        <txt>Start a new query.</txt>
+    </button>
+
+    <button>
+        <id>4</id>
+        <type>END</type>
+        <txt>Finish working with the bot.</txt>
+    </button>
+
+    <button>
+        <id>5</id>
+        <type>INSERT_NAME</type>
+        <txt>Paste your registered : </txt>
+    </button>
+
+</buttons>

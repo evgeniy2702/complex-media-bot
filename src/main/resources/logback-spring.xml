@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- my appender for write to files logs for dev profile-->
+    <springProfile name="dev">
+
+        <!-- appender console by default -->
+
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+        <!--appender for write the log to the file by the direct ${catalina.base}/logs/dev/console.log-->
+
+        <property name="LOGS" value="${catalina.base}/logs/ComplexMediaBot" />
+
+        <appender name="consoleLogger"
+                             class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/console.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{ISO8601} %-5level ${PID} --- [%15.15t] %-40.40C{1.} : %m%n%xEx
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>
+                    ${LOGS}/archived/console_%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <!-- appender for telegram bot logs -->
+        <appender name="telegramLogger"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/telegram.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{ISO8601} %-5level ${PID} --- [%15.15t] %-40.40C{1.} : %m%n%xEx
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>
+                    ${LOGS}/archived/telegram_%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <!-- appender for viber bot logs -->
+        <appender name="viberLogger"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/viber.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{ISO8601} %-5level ${PID} --- [%15.15t] %-40.40C{1.} : %m%n%xEx
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>
+                    ${LOGS}/archived/viber_%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <!-- LOG everything at INFO level -->
+
+        <root level="info">
+            <appender-ref ref="telegramLogger" />
+            <appender-ref ref="viberLogger" />
+            <appender-ref ref="consoleLogger" />
+            <appender-ref ref="CONSOLE" />
+        </root>
+
+        <!-- LOG for logger consoleLogger as ConsoleLogger.getInstance(),
+         telegramLogger as TelegramLogger.getInstance()
+         and ua.ukrposhta.complexmediabot at TRACE level -->
+
+        <logger name="consoleLogger" level="info" additivity="false">
+            <appender-ref ref="consoleLogger" />
+        </logger>
+        <logger name="telegramLogger" level="trace" additivity="false">
+            <appender-ref ref="telegramLogger" />
+        </logger>
+        <logger name="viberLogger" level="trace" additivity="false">
+            <appender-ref ref="viberLogger" />
+        </logger>
+        <logger name="ua.ukrposhta.complexmediabot" level="trace" additivity="false">
+            <appender-ref ref="CONSOLE" />
+        </logger>
+
+    </springProfile>
+
+    <!-- my appender for write to files logs for prod profile-->
+    <springProfile name="prod">
+
+        <!-- appender console by default -->
+
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+        <!-- appender for write the log to the file by the direct ${catalina.base}/logs/prod/console.log -->
+
+        <property name="LOGS" value="${catalina.base}/logs/ComplexMediaBot" />
+
+        <appender name="consoleLogger"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/console.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{ISO8601} %-5level ${PID} --- [%15.15t] %-40.40C{1.} : %m%n%xEx
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>
+                    ${LOGS}/archived/console_%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <!-- appender for telegram bot logs -->
+        <appender name="telegramLogger"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/telegram.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{ISO8601} %-5level ${PID} --- [%15.15t] %-40.40C{1.} : %m%n%xEx
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>
+                    ${LOGS}/archived/telegram_%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <!-- appender for viber bot logs -->
+        <appender name="viberLogger"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/viber.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{ISO8601} %-5level ${PID} --- [%15.15t] %-40.40C{1.} : %m%n%xEx
+                </Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>
+                    ${LOGS}/archived/viber_%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <!-- LOG everything at INFO level -->
+
+        <root level="info">
+            <appender-ref ref="telegramLogger" />
+            <appender-ref ref="viberLogger" />
+            <appender-ref ref="consoleLogger" />
+            <appender-ref ref="CONSOLE" />
+        </root>
+
+        <!-- LOG for logger consoleLogger as ConsoleLogger.getInstance(),
+         telegramLogger as TelegramLogger.getInstance()
+         and ua.ukrposhta.complexmediabot at TRACE level -->
+
+        <logger name="consoleLogger" level="info" additivity="false">
+            <appender-ref ref="consoleLogger" />
+        </logger>
+        <logger name="telegramLogger" level="trace" additivity="false">
+            <appender-ref ref="telegramLogger" />
+        </logger>
+        <logger name="viberLogger" level="trace" additivity="false">
+            <appender-ref ref="viberLogger" />
+        </logger>
+        <logger name="ua.ukrposhta.complexmediabot" level="trace" additivity="false">
+            <appender-ref ref="CONSOLE" />
+        </logger>
+    </springProfile>
+
+</configuration>

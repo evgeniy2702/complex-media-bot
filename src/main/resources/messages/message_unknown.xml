@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<messages>
+    <message>
+        <id>1</id>
+        <type>LANGUAGE</type>
+        <txt>Оберіть мову  спілкування, будь ласка | Please select a language</txt>
+    </message>
+
+    <message>
+        <id>2</id>
+        <type>UA</type>
+        <txt>Українська</txt>
+    </message>
+
+    <message>
+        <id>3</id>
+        <type>EN</type>
+        <txt>English</txt>
+    </message>
+
+    <message>
+        <id>4</id>
+        <type>END</type>
+        <txt>На все добре. | Goodbye!</txt>
+    </message>
+
+</messages>

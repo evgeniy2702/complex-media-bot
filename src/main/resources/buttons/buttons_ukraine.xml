@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<buttons>
+
+    <button>
+        <id>1</id>
+        <type>START</type>
+        <txt>START</txt>
+    </button>
+
+    <button>
+        <id>2</id>
+        <type>REQUEST</type>
+        <txt>Подати запит.</txt>
+    </button>
+
+    <button>
+        <id>3</id>
+        <type>REPEAT_REQUEST</type>
+        <txt>Розпочати новий запит.</txt>
+    </button>
+
+    <button>
+        <id>4</id>
+        <type>END</type>
+        <txt>Закінчити роботу з ботом.</txt>
+    </button>
+
+    <button>
+        <id>5</id>
+        <type>INSERT_NAME</type>
+        <txt>Вставити зареєстровані: </txt>
+    </button>
+
+</buttons>

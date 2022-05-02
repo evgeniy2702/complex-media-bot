@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+    <error>
+        <id>1</id>
+        <type>PHONE</type>
+        <txt>🔢 Looks like you are wrong. Please, write your telephone number in international format +380XX XXX XX XX again.</txt>
+    </error>
+
+    <error>
+        <id>2</id>
+        <type>EMAIL</type>
+        <txt>📧 We think, it’s not correct. Write an email again, please.</txt>
+    </error>
+
+    <error>
+        <id>3</id>
+        <type>ERROR</type>
+        <txt>Oops! Sorry, I can't recognize your request. Please select an action from the menu .</txt>
+    </error>
+
+</errors>

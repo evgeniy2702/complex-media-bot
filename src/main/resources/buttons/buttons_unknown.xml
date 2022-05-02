@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<buttons>
+    <button>
+        <id>1</id>
+        <type>START</type>
+        <txt>START</txt>
+    </button>
+
+    <button>
+        <id>2</id>
+        <type>UA</type>
+        <txt>Українська</txt>
+    </button>
+
+    <button>
+        <id>3</id>
+        <type>EN</type>
+        <txt>English</txt>
+    </button>
+
+    <button>
+        <id>4</id>
+        <type>END_WORK</type>
+        <txt>Закінчити роботу з ботом | Finish working with the bot.</txt>
+    </button>
+
+</buttons>
