@@ -11,7 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import ua.ukrposhta.complexmediabot.utils.logger.BotLogger;
 import ua.ukrposhta.complexmediabot.utils.logger.ConsoleLogger;
-import ua.ukrposhta.complexmediabot.utils.logger.TelegramLogger;
+import ua.ukrposhta.complexmediabot.utils.type.BotType;
 import ua.ukrposhta.complexmediabot.utils.type.LoggerType;
 
 import java.io.FileNotFoundException;
@@ -33,7 +33,6 @@ import java.util.List;
 public class SheetsServiceUtil {
 
     private BotLogger consoleLogger = ConsoleLogger.getLogger(LoggerType.CONSOLE);
-    private static BotLogger telegramLogger = TelegramLogger.getLogger(LoggerType.TELEGRAM);
 
     @Value("${google.application.name}")
     private String APPLICATION_NAME = "MediaBot";
@@ -41,14 +40,15 @@ public class SheetsServiceUtil {
     private static String credentials_file_path = "/google-sheets-client-secret.json";
 
 
-    public Sheets getSheetsService() throws IOException {
+    public Sheets getSheetsService(BotType type) throws IOException {
 
+        BotLogger botLogger = BotLogger.getLogger(LoggerType.valueOf(type.name()));
         consoleLogger.info("START getSheetsService method in SheetsServiceUtil.class");
 
         InputStream in = SheetsServiceUtil.class.getResourceAsStream(credentials_file_path);
         if (in == null) {
 
-            telegramLogger.error("Resource not found: " + credentials_file_path);
+            botLogger.error("Resource not found: " + credentials_file_path);
 
             throw new FileNotFoundException("Resource not found: " + credentials_file_path);
         }
@@ -69,7 +69,7 @@ public class SheetsServiceUtil {
         } catch (Exception e){
 
             consoleLogger.error("ERROR in authorize method in GoogleAuthorizeUtil.class : Sheets not builder .");
-            telegramLogger.error("ERROR in authorize method in GoogleAuthorizeUtil.class : Sheets not builder .");
+            botLogger.error("ERROR in authorize method in GoogleAuthorizeUtil.class : Sheets not builder .");
         }
 
         return sheets;

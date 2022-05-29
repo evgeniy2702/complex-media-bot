@@ -9,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ua.ukrposhta.complexmediabot.bot.BotContext;
-import ua.ukrposhta.complexmediabot.telegramBot.entityUser.Person;
+import ua.ukrposhta.complexmediabot.model.user.PersonEntity;
+import ua.ukrposhta.complexmediabot.telegramBot.entityUser.TelegramPersonEntity;
 import ua.ukrposhta.complexmediabot.utils.logger.BotLogger;
 import ua.ukrposhta.complexmediabot.utils.logger.ConsoleLogger;
-import ua.ukrposhta.complexmediabot.utils.logger.TelegramLogger;
+import ua.ukrposhta.complexmediabot.utils.type.BotType;
 import ua.ukrposhta.complexmediabot.utils.type.LoggerType;
+import ua.ukrposhta.complexmediabot.viberBot.entityUser.ViberPersonEntity;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -33,7 +35,7 @@ import java.util.List;
 @Component
 public class GoogleSheetsLive {
 
-    private BotLogger telegramLogger = TelegramLogger.getLogger(LoggerType.TELEGRAM);
+
     private BotLogger consoleLogger = ConsoleLogger.getLogger(LoggerType.CONSOLE);
 
     private SheetsServiceUtil sheetsServiceUtil;
@@ -51,22 +53,26 @@ public class GoogleSheetsLive {
                                          Integer numberOfCellExcelSheetForMediaRequest,
                                          Integer numberOfRowsForMediaRequest) throws IOException, GeneralSecurityException {
 
+        BotLogger botLogger = BotLogger.getLogger(LoggerType.valueOf(context.getTypeBot().name()));
         consoleLogger.info("START writeDataInExcelSheet method in GoogleSheetsLive.class");
 
         List<ValueRange> data = new ArrayList<>();
 
-        Person person = context.getPerson();
+        BotType type = context.getTypeBot();
+        ValueRange requestMediaInfo = new ValueRange();
 
-        if(numberOfCellExcelSheetForMediaRequest == numberOfRowsForMediaRequest)
-            numberOfCellExcelSheetForMediaRequest = 2;
+        if(type.equals(BotType.TELEGRAM)) {
+            TelegramPersonEntity telegramPerson = context.getTelegramPerson();
 
-        ValueRange requestMediaInfo = new ValueRange()
-                .setRange("A" + numberOfCellExcelSheetForMediaRequest)
-                .setValues(Collections.singletonList(
-                        Arrays.asList(LocalDate.now().toString(), person.getMediaName(), person.getName_surname(), person.getSubject(),
-                                person.getPhone(), person.getEmail())));
+            getListValueRangeAccodingBotType(data, telegramPerson, requestMediaInfo, numberOfCellExcelSheetForMediaRequest, numberOfRowsForMediaRequest);
+        }
 
-        data.add(requestMediaInfo);
+        if(type.equals(BotType.VIBER)){
+
+           ViberPersonEntity viberPerson = context.getViberPerson();
+
+           getListValueRangeAccodingBotType(data, viberPerson, requestMediaInfo, numberOfCellExcelSheetForMediaRequest, numberOfRowsForMediaRequest);
+        }
 
         ValueRange numberOfCellExcel = new ValueRange()
                 .setRange("X994")
@@ -75,8 +81,8 @@ public class GoogleSheetsLive {
 
         data.add(numberOfCellExcel);
 
-        telegramLogger.info("requestMediaInfo for write to excel sheet request from media : " + requestMediaInfo.toString());
-        telegramLogger.info("write number of cell excel in cache as sheet : " + numberOfCellExcel.toString());
+        botLogger.info("requestMediaInfo for write to excel sheet request from media : " + requestMediaInfo.toString());
+        botLogger.info("write number of cell excel in cache as sheet : " + numberOfCellExcel.toString());
 
         try {
 
@@ -84,15 +90,15 @@ public class GoogleSheetsLive {
                     .setValueInputOption("USER_ENTERED")
                     .setData(data);
 
-            BatchUpdateValuesResponse batchResult = sheetsServiceUtil.getSheetsService().spreadsheets().values()
+            BatchUpdateValuesResponse batchResult = sheetsServiceUtil.getSheetsService(type).spreadsheets().values()
                     .batchUpdate(SPREADSHEET_ID, batchBody)
                     .execute();
 
         }catch (GoogleJsonResponseException google){
             consoleLogger.error("ERROR writeDataInExcelSheet method in GoogleSheetsLive.class : " + google.getMessage());
             consoleLogger.error("CAUSE writeDataInExcelSheet method in GoogleSheetsLive.class : " + google.getCause());
-            telegramLogger.error("ERROR writeDataInExcelSheet method in GoogleSheetsLive.class : " + google.getMessage());
-            telegramLogger.error("CAUSE writeDataInExcelSheet method in GoogleSheetsLive.class : " + google.getCause());
+            botLogger.error("ERROR writeDataInExcelSheet method in GoogleSheetsLive.class : " + google.getMessage());
+            botLogger.error("CAUSE writeDataInExcelSheet method in GoogleSheetsLive.class : " + google.getCause());
             google.getStackTrace();
         }
 
@@ -102,13 +108,16 @@ public class GoogleSheetsLive {
 
     public Integer readNumberOfCellExcelSheetFromExcelSheet(BotContext context, int numberOfCellExcelSheet) throws IOException, GeneralSecurityException {
 
+        BotLogger botLogger = BotLogger.getLogger(LoggerType.valueOf(context.getTypeBot().name()));
         consoleLogger.info("start readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class");
+
+        BotType type = context.getTypeBot();
 
         int numberOfRowsForMediaRequest = 100;
 
         try {
             List<String> ranges = Arrays.asList("X994","X992");
-            BatchGetValuesResponse readResult = sheetsServiceUtil.getSheetsService().spreadsheets().values()
+            BatchGetValuesResponse readResult = sheetsServiceUtil.getSheetsService(type).spreadsheets().values()
                     .batchGet(SPREADSHEET_ID)
                     .setRanges(ranges)
                     .execute();
@@ -119,12 +128,12 @@ public class GoogleSheetsLive {
             numberOfRowsForMediaRequest = Integer.valueOf(readResult.getValueRanges().get(1)
                                             .getValues().get(0).get(0).toString());
 
-            telegramLogger.info("body for write to excel sheet numberOfCellExcelSheet : " + numberOfCellExcelSheet + " ; numberOfRowsForMediaRequest : " + numberOfRowsForMediaRequest);
+            botLogger.info("body for write to excel sheet numberOfCellExcelSheet : " + numberOfCellExcelSheet + " ; numberOfRowsForMediaRequest : " + numberOfRowsForMediaRequest);
         }catch (GoogleJsonResponseException google){
             consoleLogger.error("ERROR readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class : " + google.getMessage());
             consoleLogger.error("CAUSE readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class : " + google.getCause());
-            telegramLogger.error("ERROR readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class : " + google.getMessage());
-            telegramLogger.error("CAUSE readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class : " + google.getCause());
+            botLogger.error("ERROR readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class : " + google.getMessage());
+            botLogger.error("CAUSE readNumberOfCellExcelSheetFromExcelSheet method in GoogleSheetsLive.class : " + google.getCause());
             google.getStackTrace();
         }
 
@@ -134,4 +143,18 @@ public class GoogleSheetsLive {
         return writeDataInExcelSheet(context, numberOfCellExcelSheet, numberOfRowsForMediaRequest);
     }
 
+    private void getListValueRangeAccodingBotType(List<ValueRange> data, PersonEntity personEntity, ValueRange requestMediaInfo,
+                                                              Integer numberOfCellExcelSheetForMediaRequest,
+                                                              Integer numberOfRowsForMediaRequest){
+
+            if (numberOfCellExcelSheetForMediaRequest == numberOfRowsForMediaRequest)
+                numberOfCellExcelSheetForMediaRequest = 2;
+
+        requestMediaInfo
+                    .setRange("A" + numberOfCellExcelSheetForMediaRequest)
+                    .setValues(Collections.singletonList(
+                            Arrays.asList(LocalDate.now().toString(), personEntity.getMediaName(), personEntity.getName_surname(), personEntity.getSubject(),
+                                    personEntity.getPhone(), personEntity.getEmail())));
+            data.add(requestMediaInfo);
+    }
 }

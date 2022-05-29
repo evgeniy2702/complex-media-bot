@@ -16,12 +16,12 @@ import lombok.ToString;
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of={"chat_id"})
 @ToString
-public class IncomingMessage {
+public class IncomTelegramMessage {
 
     private String text;
 
     // Data about telegram User
-    private Long chat_id;
+    private String chat_id;
     private Boolean isBot;
     private String firstName;
     private String lastName;

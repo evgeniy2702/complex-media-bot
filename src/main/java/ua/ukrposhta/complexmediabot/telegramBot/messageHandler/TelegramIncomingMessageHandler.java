@@ -1,5 +1,6 @@
 package ua.ukrposhta.complexmediabot.telegramBot.messageHandler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -10,14 +11,15 @@ import ua.ukrposhta.complexmediabot.bot.BotContext;
 import ua.ukrposhta.complexmediabot.bot.BotState;
 import ua.ukrposhta.complexmediabot.bot.TelegramBot;
 import ua.ukrposhta.complexmediabot.google.GoogleSheetsLive;
-import ua.ukrposhta.complexmediabot.telegramBot.message.IncomingMessage;
-import ua.ukrposhta.complexmediabot.telegramBot.entityUser.Person;
+import ua.ukrposhta.complexmediabot.model.user.PersonEntity;
 import ua.ukrposhta.complexmediabot.model.xml_files_entities.textButtonsOfBot.ButtonEntity;
 import ua.ukrposhta.complexmediabot.model.xml_files_entities.textButtonsOfBot.ButtonEntityList;
 import ua.ukrposhta.complexmediabot.model.xml_files_entities.textMessageOfBot.MessageEntity;
 import ua.ukrposhta.complexmediabot.model.xml_files_entities.textMessageOfBot.MessageEntityList;
 import ua.ukrposhta.complexmediabot.service.SaxHandlerService;
 import ua.ukrposhta.complexmediabot.service.SaxParserService;
+import ua.ukrposhta.complexmediabot.telegramBot.entityUser.TelegramPersonEntity;
+import ua.ukrposhta.complexmediabot.telegramBot.message.IncomTelegramMessage;
 import ua.ukrposhta.complexmediabot.utils.exception.SenderException;
 import ua.ukrposhta.complexmediabot.utils.handlerXml.MySaxHandlerForButtons;
 import ua.ukrposhta.complexmediabot.utils.handlerXml.MySaxHandlerForMessage;
@@ -36,8 +38,8 @@ import java.util.stream.Collectors;
  * @author Zhurenko Evgeniy
  *
  * @apiNote
- * This class is Handler. It handle incoming message from telegram server, create current bot context, put and remove user
- * from temporary cache in view HashMap<long chat_id, Person user>, identify language of user and to turn on appropriate
+ * This class is Handler. It handle incoming message from telegram server, create current telegramBot context, put and remove user
+ * from temporary cache in view HashMap<long chat_id, TelegramPersonEntity user>, identify language of user and to turn on appropriate
  * paths of files with message, buttons and errors
  */
 
@@ -79,19 +81,19 @@ public class TelegramIncomingMessageHandler {
     private SaxHandlerService handler;
     private BotLogger logger;
     private BotLogger telegramLogger;
-    private TelegramBot bot;
-    private BotStateHandler stateHandler;
+    private TelegramBot telegramBot;
+    private TelegramBotStateHandler stateHandler;
     private HashSet<String> language_codeList;
 
     public TelegramIncomingMessageHandler(GoogleSheetsLive googleSheetsLive,
                                           SaxParserService parser,
                                           SaxHandlerService handler,
-                                          TelegramBot bot,
-                                          BotStateHandler stateHandler) {
+                                          TelegramBot botTelegram,
+                                          TelegramBotStateHandler stateHandler) {
         this.googleSheetsLive = googleSheetsLive;
         this.parser = parser;
         this.handler = handler;
-        this.bot = bot;
+        this.telegramBot = botTelegram;
         this.stateHandler = stateHandler;
         this.logger = BotLogger.getLogger(LoggerType.CONSOLE);
         this.telegramLogger = TelegramLogger.getLogger(LoggerType.TELEGRAM);
@@ -100,163 +102,164 @@ public class TelegramIncomingMessageHandler {
         }};
     }
 
-    public void processingIncomingMessage(Update update, Map<Long, Person> personMap){
-            logger.info("START processingIncomingMessage method in TelegramIncomingMessageHandler.class");
-            if(update.hasMessage()) {
-                if(update.getMessage().hasText()){
-                    final String text = update.getMessage().getText();
-                    final Long chat_id = update.getMessage().getChatId();
-                    final String language = update.getMessage().getFrom().getLanguageCode();
+    public void processingIncomingMessage(Update update, Map<String, PersonEntity> personMap) throws JsonProcessingException {
+        logger.info("START processingIncomingMessage method in TelegramIncomingMessageHandler.class");
 
-                    IncomingMessage incomingTelegramMessage = IncomingMessage.builder()
-                            .chat_id(chat_id)
-                            .firstName(update.getMessage().getFrom().getFirstName())
-                            .isBot(update.getMessage().getFrom().getIsBot())
-                            .lastName(update.getMessage().getFrom().getLastName())
-                            .languageCode(language)
-                            .userName(update.getMessage().getFrom().getUserName())
-                            .text(text)
-                            .build();
+        if (update.hasMessage()) {
+            if (update.getMessage().hasText()) {
+                final String text = update.getMessage().getText();
+                final String chat_id = String.valueOf(update.getMessage().getChatId());
+                final String language = update.getMessage().getFrom().getLanguageCode();
 
-                    logger.info(incomingTelegramMessage.toString());
-                    telegramLogger.info(incomingTelegramMessage.toString());
+                IncomTelegramMessage incomingTelegramMessage = IncomTelegramMessage.builder()
+                        .chat_id(chat_id)
+                        .firstName(update.getMessage().getFrom().getFirstName())
+                        .isBot(update.getMessage().getFrom().getIsBot())
+                        .lastName(update.getMessage().getFrom().getLastName())
+                        .languageCode(language)
+                        .userName(update.getMessage().getFrom().getUserName())
+                        .text(text)
+                        .build();
 
-                    Person person = personMap.get(chat_id);
+                logger.info(incomingTelegramMessage.toString());
+                telegramLogger.info(incomingTelegramMessage.toString());
 
-                    BotContext context;
-                    BotState state;
+                TelegramPersonEntity telegramPerson = (TelegramPersonEntity) personMap.get(String.valueOf(chat_id));
 
-                    if(person == null){
-                        person = new Person(incomingTelegramMessage);
-                        telegramLogger.info("IF TelegramIncomingMessageHandler.class processingIncomingMessage : " + person.toString());
-                        switchLanguage(language, person, language_codeList);
-                        context = BotContext.of(BotType.TELEGRAM.getBotType(BotType.TELEGRAM.getText()), bot, person, text);
+                BotContext context;
+                BotState state;
 
-                    } else {
-                        telegramLogger.info("ELSE  TelegramIncomingMessageHandler.class processingIncomingMessage : " + person.toString());
-                        if(person.getIncomingTelegramMessage().getLanguageCode().equals("unknown"))
-                            switchLanguage(text, person, language_codeList);
-                        context = BotContext.of(BotType.TELEGRAM.getBotType(BotType.TELEGRAM.getText()), bot, person, text);
-                    }
-
-
-                    telegramLogger.info("TelegramIncomingMessageHandler.class CurrentState : " + context.getPerson().getCurrentStateName() + "; PrevState : " +
-                                    context.getPerson().getPrevStateName());
-                    telegramLogger.info("TelegramIncomingMessageHandler.class text : " + text);
-                    telegramLogger.info("TelegramIncomingMessageHandler.class person : " + context.getPerson().toString());
-                    telegramLogger.info("TelegramIncomingMessageHandler.class context : " + context.toString());
-                    telegramLogger.info("TelegramIncomingMessageHandler.class language_codeList : " + language_codeList.size());
-
-                    if(language_codeList
-                            .contains(person.getIncomingTelegramMessage().getLanguageCode())) {
-                        ifEndWorkWithBot(update, person);
-                    }
-
-                    try {
-
-                        if(person.getIncomingTelegramMessage().getChat_id() != Long.parseLong(firstChatIdPiarUnit) ||
-                                person.getIncomingTelegramMessage().getChat_id() != Long.parseLong(secondChatIdPiarUnit)) {
-
-                            state = stateHandler.handleIncomingMessage(update, context, bot);
-
-                            logger.info("STATE update.hasMessage() : " + state);
-                            personMap.put(chat_id, person);
-
-                        }
-
-                        telegramLogger.info("TelegramIncomingMessageHandler.class user : " + person.toString());
-
-                        if(!person.getSubject().equalsIgnoreCase("") &&
-                                (person.getCurrentStateName().equals(BotState.END.name()))) {
-                            numberOfCellExcelSheet = googleSheetsLive.readNumberOfCellExcelSheetFromExcelSheet(context, numberOfCellExcelSheet);
-                            if(!this.activeProfile.equalsIgnoreCase("dev")) {
-                                sendNewRequestForPiar(context, firstChatIdPiarUnit);
-                                sendNewRequestForPiar(context, secondChatIdPiarUnit);
-                            }
-
-                            telegramLogger.info("SEND TelegramIncomingMessageHandler.class info about request firstChatIdPiarUnit : " + firstChatIdPiarUnit + " | secondChatIdPiarUnit : " +
-                                    secondChatIdPiarUnit);
-                            personMap.remove(chat_id);
-                            telegramLogger.info("TelegramIncomingMessageHandler.class size of cache HashMap<Long, Person> : " +
-                                    language_codeList.size());
-                        }
-
-                        telegramLogger.info("TelegramIncomingMessageHandler.class Name of cell in excel google sheet : " + numberOfCellExcelSheet);
-
-                    } catch (Exception e) {
-                        logger.error("TelegramIncomingMessageHandler.class ERROR : " + e.getMessage());
-                        logger.error("TelegramIncomingMessageHandler.class CAUSE : " + e.getCause());
-                        telegramLogger.error("TelegramIncomingMessageHandler.class ERROR : " + e.getMessage());
-                        telegramLogger.error("TelegramIncomingMessageHandler.class CAUSE : " + e.getCause());
-                         throw new SenderException(context.getTypeBot(), e.getCause());
-                    }
+                if (telegramPerson == null) {
+                    telegramPerson = new TelegramPersonEntity(incomingTelegramMessage);
+                    telegramLogger.info("IF TelegramIncomingMessageHandler.class processingIncomingMessage : " + telegramPerson.toString());
+                    switchLanguage(language, telegramPerson, language_codeList);
+                } else {
+                    telegramLogger.info("ELSE  TelegramIncomingMessageHandler.class processingIncomingMessage : " + telegramPerson.toString());
+                    if (telegramPerson.getIncomTelegramMessage().getLanguageCode().equals("unknown"))
+                        switchLanguage(text, telegramPerson, language_codeList);
                 }
-            }
-            if(update.hasCallbackQuery()){
-                Person person = personMap.get(update.getCallbackQuery().getFrom().getId());
-                if((person.getIncomingTelegramMessage().getLastName() + " " +
-                        person.getIncomingTelegramMessage().getFirstName())
-                        .equals(update.getCallbackQuery().getData())){
-                    BotContext context = BotContext.of(BotType.TELEGRAM.getBotType(BotType.TELEGRAM.getText()),
-                            bot, person, update.getCallbackQuery().getData());
-                    BotState state = stateHandler.handleIncomingMessage(update, context, bot);
-                    telegramLogger.info("TelegramIncomingMessageHandler.class state update.hasCallbackQuery() : " + state);
+
+                context = BotContext.ofTelegram(BotType.TELEGRAM.getBotType(BotType.TELEGRAM.getText()), telegramBot, telegramPerson, text);
+
+                telegramLogger.info("TelegramIncomingMessageHandler.class CurrentState : " + telegramPerson.getCurrentStateName() + "; PrevState : " +
+                        telegramPerson.getPrevStateName());
+                telegramLogger.info("TelegramIncomingMessageHandler.class text : " + text);
+                telegramLogger.info("TelegramIncomingMessageHandler.class telegramPerson : " + context.getTelegramPerson().toString());
+                telegramLogger.info("TelegramIncomingMessageHandler.class context : " + context.toString());
+                telegramLogger.info("TelegramIncomingMessageHandler.class language_codeList : " + language_codeList.size());
+
+                if (language_codeList
+                        .contains(telegramPerson.getIncomTelegramMessage().getLanguageCode())) {
+                    ifEndWorkWithBot(update, telegramPerson);
+                }
+
+                try {
+
+                    if (!telegramPerson.getIncomTelegramMessage().getChat_id().equals(firstChatIdPiarUnit) ||
+                            !telegramPerson.getIncomTelegramMessage().getChat_id().equals(secondChatIdPiarUnit)) {
+
+                        state = stateHandler.handleIncomingMessage(update, context, telegramBot);
+
+                        logger.info("STATE update.hasMessage() : " + state);
+                        personMap.put(String.valueOf(chat_id), telegramPerson);
+
+                    }
+
+                    telegramLogger.info("TelegramIncomingMessageHandler.class user : " + telegramPerson.toString());
+
+                    if (!telegramPerson.getSubject().equalsIgnoreCase("") &&
+                            (telegramPerson.getCurrentStateName().equals(BotState.END.name()))) {
+                        numberOfCellExcelSheet = googleSheetsLive.readNumberOfCellExcelSheetFromExcelSheet(context, numberOfCellExcelSheet);
+                        if (!this.activeProfile.equalsIgnoreCase("dev")) {
+                            sendNewRequestForPiar(context, firstChatIdPiarUnit);
+                            sendNewRequestForPiar(context, secondChatIdPiarUnit);
+                        }
+
+                        telegramLogger.info("SEND TelegramIncomingMessageHandler.class info about request firstChatIdPiarUnit : " + firstChatIdPiarUnit + " | secondChatIdPiarUnit : " +
+                                secondChatIdPiarUnit);
+                        personMap.remove(String.valueOf(chat_id));
+                        telegramLogger.info("TelegramIncomingMessageHandler.class size of cache language_codeList : " +
+                                language_codeList.size());
+                    }
+
+                    telegramLogger.info("TelegramIncomingMessageHandler.class Name of cell in excel google sheet : " + numberOfCellExcelSheet);
+
+                } catch (Exception e) {
+                    logger.error("TelegramIncomingMessageHandler.class ERROR : " + e.getMessage());
+                    logger.error("TelegramIncomingMessageHandler.class CAUSE : " + e.getCause());
+                    telegramLogger.error("TelegramIncomingMessageHandler.class ERROR : " + e.getMessage());
+                    telegramLogger.error("TelegramIncomingMessageHandler.class CAUSE : " + e.getCause());
+                    throw new SenderException(context.getTypeBot(), e.getCause());
                 }
             }
         }
+        if (update.hasCallbackQuery()) {
+            TelegramPersonEntity telegramPerson = (TelegramPersonEntity) personMap
+                    .get(String.valueOf(update.getCallbackQuery().getFrom().getId()));
+            if ((telegramPerson.getIncomTelegramMessage().getLastName() + " " +
+                    telegramPerson.getIncomTelegramMessage().getFirstName())
+                    .equals(update.getCallbackQuery().getData())) {
+                BotContext context = BotContext.ofTelegram(BotType.TELEGRAM.getBotType(BotType.TELEGRAM.getText()),
+                        telegramBot, telegramPerson, update.getCallbackQuery().getData());
+                BotState state = stateHandler.handleIncomingMessage(update, context, telegramBot);
+                telegramLogger.info("TelegramIncomingMessageHandler.class state update.hasCallbackQuery() : " + state);
+            }
+        }
+    }
 
-        private void switchLanguage(String language, Person person, HashSet<String> language_codeList) {
+
+    private void switchLanguage(String language, TelegramPersonEntity telegramPerson, HashSet<String> language_codeList) {
             logger.info("START switchLanguage method in TelegramIncomingMessageHandler.class");
             switch (language){
                 case "uk":
-                    person.getIncomingTelegramMessage().setLanguageCode(language);
-                    person.setMessagePath(pathXmlUkraineMessage);
-                    person.setButtonPath(pathXmlUkraineButton);
-                    person.setErrorPath(pathXmlUkraineError);
-                    person.setCurrentStateName(BotState.GOOD_DAY.name());
-                    person.setPrevStateName(BotState.START.name());
-                    person.setAddDate(LocalDateTime.now());
+                    telegramPerson.getIncomTelegramMessage().setLanguageCode(language);
+                    telegramPerson.setMessagePath(pathXmlUkraineMessage);
+                    telegramPerson.setButtonPath(pathXmlUkraineButton);
+                    telegramPerson.setErrorPath(pathXmlUkraineError);
+                    telegramPerson.setCurrentStateName(BotState.GOOD_DAY.name());
+                    telegramPerson.setPrevStateName(BotState.START.name());
+                    telegramPerson.setAddDate(LocalDateTime.now());
                     break;
                 case "Українська":
-                    person.getIncomingTelegramMessage().setLanguageCode("uk");
-                    person.setMessagePath(pathXmlUkraineMessage);
-                    person.setButtonPath(pathXmlUkraineButton);
-                    person.setErrorPath(pathXmlUkraineError);
+                    telegramPerson.getIncomTelegramMessage().setLanguageCode("uk");
+                    telegramPerson.setMessagePath(pathXmlUkraineMessage);
+                    telegramPerson.setButtonPath(pathXmlUkraineButton);
+                    telegramPerson.setErrorPath(pathXmlUkraineError);
                     break;
                 case "en":
-                    person.getIncomingTelegramMessage().setLanguageCode(language);
-                    person.setMessagePath(pathXmlEnglishMessage);
-                    person.setButtonPath(pathXmlEnglishButton);
-                    person.setErrorPath(pathXmlEnglishError);
-                    person.setCurrentStateName(BotState.GOOD_DAY.name());
-                    person.setPrevStateName(BotState.START.name());
-                    person.setAddDate(LocalDateTime.now());
+                    telegramPerson.getIncomTelegramMessage().setLanguageCode(language);
+                    telegramPerson.setMessagePath(pathXmlEnglishMessage);
+                    telegramPerson.setButtonPath(pathXmlEnglishButton);
+                    telegramPerson.setErrorPath(pathXmlEnglishError);
+                    telegramPerson.setCurrentStateName(BotState.GOOD_DAY.name());
+                    telegramPerson.setPrevStateName(BotState.START.name());
+                    telegramPerson.setAddDate(LocalDateTime.now());
                     break;
                 case "English":
-                    person.getIncomingTelegramMessage().setLanguageCode("en");
-                    person.setMessagePath(pathXmlEnglishMessage);
-                    person.setButtonPath(pathXmlEnglishButton);
-                    person.setErrorPath(pathXmlEnglishError);
+                    telegramPerson.getIncomTelegramMessage().setLanguageCode("en");
+                    telegramPerson.setMessagePath(pathXmlEnglishMessage);
+                    telegramPerson.setButtonPath(pathXmlEnglishButton);
+                    telegramPerson.setErrorPath(pathXmlEnglishError);
                     break;
                 default:
-                    person.getIncomingTelegramMessage().setLanguageCode("unknown");
-                    person.setMessagePath(pathXmlUnknownMessage);
-                    person.setButtonPath(pathXmlUnknownButton);
-                    person.setErrorPath(pathXmlEnglishError);
-                    person.setCurrentStateName(BotState.LANGUAGE.name());
-                    person.setPrevStateName(BotState.LANGUAGE.name());
-                    person.setAddDate(LocalDateTime.now());
+                    telegramPerson.getIncomTelegramMessage().setLanguageCode("unknown");
+                    telegramPerson.setMessagePath(pathXmlUnknownMessage);
+                    telegramPerson.setButtonPath(pathXmlUnknownButton);
+                    telegramPerson.setErrorPath(pathXmlEnglishError);
+                    telegramPerson.setCurrentStateName(BotState.LANGUAGE.name());
+                    telegramPerson.setPrevStateName(BotState.LANGUAGE.name());
+                    telegramPerson.setAddDate(LocalDateTime.now());
                     break;
             }
-            language_codeList.add(person.getIncomingTelegramMessage().getLanguageCode());
-            telegramLogger.info("TelegramIncomingMessageHandler.class LanguageCode of person : " +
-                    person.getIncomingTelegramMessage().getLanguageCode());
+            language_codeList.add(telegramPerson.getIncomTelegramMessage().getLanguageCode());
+            telegramLogger.info("TelegramIncomingMessageHandler.class LanguageCode of telegramPerson : " +
+                    telegramPerson.getIncomTelegramMessage().getLanguageCode());
             telegramLogger.info("TelegramIncomingMessageHandler.class size of language_codeList : " +
                     language_codeList.size());
         }
 
         @SuppressWarnings("unchecked")
-        private void ifEndWorkWithBot(Update update, Person person) {
+    private void ifEndWorkWithBot(Update update, TelegramPersonEntity telegramPerson) {
 
             logger.info("START ifEndWorkWithBot method in TelegramBot.class");
 
@@ -270,7 +273,7 @@ public class TelegramIncomingMessageHandler {
 
                 ButtonEntityList buttonEntityList =
                         (ButtonEntityList) parser.getParser(ParserHandlerType.BUTTON)
-                        .getObjectExchangeFromXML(person.getButtonPath(), buttonHandlerXml);
+                        .getObjectExchangeFromXML(telegramPerson.getButtonPath(), buttonHandlerXml);
 
 
                 List<ButtonEntity> listOfEndBtn = buttonEntityList.getButtonEntities().stream()
@@ -285,9 +288,9 @@ public class TelegramIncomingMessageHandler {
                 if (listOfEndBtn.stream().anyMatch(btn -> btn.getTxt().equals(text))) {
                     BotState state = BotState.END;
                     String statePrev = BotState.byId(state.ordinal() - 1).name();
-                    person.setCurrentStateName(state.name());
-                    person.setPrevStateName(statePrev);
-                    person.setExit(true);
+                    telegramPerson.setCurrentStateName(state.name());
+                    telegramPerson.setPrevStateName(statePrev);
+                    telegramPerson.setExit(true);
                 }
             }
 
@@ -304,16 +307,16 @@ public class TelegramIncomingMessageHandler {
         messageHandlerXml.setBotType(BotType.TELEGRAM.name());
 
         MessageEntityList messageEntityList = (MessageEntityList) parser.getParser(ParserHandlerType.MESSAGE)
-                .getObjectExchangeFromXML(context.getPerson().getMessagePath(), messageHandlerXml);
+                .getObjectExchangeFromXML(context.getTelegramPerson().getMessagePath(), messageHandlerXml);
 
         MessageEntity PIAR_UNIT = messageEntityList.getMessageEntities().stream()
                 .filter(msg -> msg.getType().equals("PIAR_UNIT"))
                 .collect(Collectors.toList()).get(0);
 
-        if(!context.getPerson().getSubject().isEmpty()) {
+        if(!context.getTelegramPerson().getSubject().isEmpty()) {
 
             String sendText = PIAR_UNIT.getTxt() + "\n1) Назва : " +
-                    context.getPerson().getMediaName() + ".\n2) Запит : " + context.getPerson().getSubject() +
+                    context.getTelegramPerson().getMediaName() + ".\n2) Запит : " + context.getTelegramPerson().getSubject() +
                     "\n3) Посилання на таблицю запитів : " +
                     "https://docs.google.com/spreadsheets/d/1juzFkS2cZctAT7exY4N9fS4WfwrWZ3AVqweKJXAy0hE/edit#gid=0";
 
@@ -324,7 +327,7 @@ public class TelegramIncomingMessageHandler {
 
             try {
 
-                context.getBot().execute(message);
+                context.getTelegramBot().execute(message);
 
             } catch (TelegramApiException e) {
                 telegramLogger.error("TelegramIncomingMessageHandler.class ERROR : " + Arrays.asList(e.getStackTrace()));

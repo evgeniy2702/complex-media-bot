@@ -19,8 +19,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import ua.ukrposhta.complexmediabot.model.keyboard.CommonButton;
 import ua.ukrposhta.complexmediabot.model.keyboard.CommonKeyboard;
 import ua.ukrposhta.complexmediabot.model.keyboard.CommonRow;
-import ua.ukrposhta.complexmediabot.telegramBot.message.OutputMessage;
-import ua.ukrposhta.complexmediabot.telegramBot.entityUser.Person;
+import ua.ukrposhta.complexmediabot.telegramBot.entityUser.TelegramPersonEntity;
+import ua.ukrposhta.complexmediabot.model.OutputMessage;
 import ua.ukrposhta.complexmediabot.utils.exception.SenderException;
 import ua.ukrposhta.complexmediabot.utils.logger.BotLogger;
 import ua.ukrposhta.complexmediabot.utils.logger.ConsoleLogger;
@@ -45,12 +45,12 @@ import java.util.Map;
 @Setter
 public class TelegramBot extends TelegramWebhookBot implements TypedSender {
 
-    private String botUserName;
-    private String botPath;
-    private String botToken;
+    private String telegramBotName;
+    private String telegramWebhookPath;
+    private String telegramBotToken;
 
     public static final int MAX_ROWS_COUNT = 2;
-    private Map<Long, Person> persons = new HashMap<>();
+    private Map<String, TelegramPersonEntity> persons = new HashMap<>();
     private BotLogger consoleLogger = ConsoleLogger.getLogger(LoggerType.CONSOLE);
     private BotLogger telegramLogger = TelegramLogger.getLogger(LoggerType.TELEGRAM);
 
@@ -65,17 +65,17 @@ public class TelegramBot extends TelegramWebhookBot implements TypedSender {
 
     @Override
     public String getBotUsername() {
-        return botUserName;
+        return telegramBotName;
     }
 
     @Override
     public String getBotToken() {
-        return botToken;
+        return telegramBotToken;
     }
 
     @Override
     public String getBotPath() {
-        return botPath;
+        return telegramWebhookPath;
     }
 
 //    Формирует результирующее сообщение для отправки на сервер Телеграмма
@@ -84,7 +84,7 @@ public class TelegramBot extends TelegramWebhookBot implements TypedSender {
         telegramLogger.info("TelegramBot.class  OutputMessage : " + message.toString());
         try {
             SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(String.valueOf(message.getContext().getPerson().getIncomingTelegramMessage().getChat_id()));
+            sendMessage.setChatId(String.valueOf(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id()));
             sendMessage.setText(replaceMarkdown(message.getMessage_text()));
             sendMessage.enableMarkdown(true);
             sendMessage.setReplyMarkup(replyKeyboard(message.getReplyKeyboardReply()));
@@ -113,8 +113,8 @@ public class TelegramBot extends TelegramWebhookBot implements TypedSender {
         telegramLogger.info("OutputMessage in sendInlineKeyboard : " + message.toString());
         try {
             SendMessage sendMessageWithInline = new SendMessage();
-            sendMessageWithInline.setChatId(String.valueOf(message.getContext().getPerson()
-                    .getIncomingTelegramMessage().getChat_id()));
+            sendMessageWithInline.setChatId(String.valueOf(message.getContext().getTelegramPerson()
+                    .getIncomTelegramMessage().getChat_id()));
             sendMessageWithInline.setText(message.getMessage_text());
             sendMessageWithInline.setReplyMarkup(message.getInlineKeyboardMarkup());
             try {
@@ -185,14 +185,14 @@ public class TelegramBot extends TelegramWebhookBot implements TypedSender {
                         HttpStatus.FORBIDDEN.value());
                 telegramLogger.info("ERROR in handlerException : " + HttpStatus.FORBIDDEN.getReasonPhrase() + " " +
                         HttpStatus.FORBIDDEN.value());
-                persons.remove(message.getContext().getPerson().getIncomingTelegramMessage().getChat_id());
+                persons.remove(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id());
             } else if(errorCode == HttpStatus.BAD_REQUEST.value() &&
                     errorString.equals("Bad Request: chat not found")){
                 consoleLogger.info("ERROR in handlerException : " + HttpStatus.BAD_REQUEST.getReasonPhrase() + " " +
                         HttpStatus.BAD_REQUEST.value());
                 telegramLogger.info("ERROR in handlerException : " + HttpStatus.BAD_REQUEST.getReasonPhrase() + " " +
                         HttpStatus.BAD_REQUEST.value());
-                persons.remove(message.getContext().getPerson().getIncomingTelegramMessage().getChat_id());
+                persons.remove(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id());
             }
         }
     }

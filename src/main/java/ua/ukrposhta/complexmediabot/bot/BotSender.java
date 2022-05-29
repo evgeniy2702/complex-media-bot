@@ -2,11 +2,12 @@ package ua.ukrposhta.complexmediabot.bot;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ua.ukrposhta.complexmediabot.telegramBot.message.OutputMessage;
+import ua.ukrposhta.complexmediabot.model.OutputMessage;
 import ua.ukrposhta.complexmediabot.utils.exception.SenderException;
 import ua.ukrposhta.complexmediabot.utils.logger.BotLogger;
 import ua.ukrposhta.complexmediabot.utils.logger.ConsoleLogger;
 import ua.ukrposhta.complexmediabot.utils.logger.TelegramLogger;
+import ua.ukrposhta.complexmediabot.utils.type.BotType;
 import ua.ukrposhta.complexmediabot.utils.type.LoggerType;
 
 import java.util.List;
@@ -28,8 +29,7 @@ public class BotSender implements Sender {
     @Override
     public void send(OutputMessage outputMessage) throws SenderException {
         BotLogger consoleLogger = ConsoleLogger.getLogger(LoggerType.CONSOLE);
-        BotLogger logger = TelegramLogger
-                .getLogger(LoggerType.valueOf(outputMessage.getContext().getTypeBot().name()));
+        BotLogger logger = BotLogger.getLogger(LoggerType.valueOf(outputMessage.getContext().getTypeBot().name()));
 
         consoleLogger.info("START send method in BotSender.class");
         logger.info("Trying to send message - " + outputMessage);
@@ -37,9 +37,17 @@ public class BotSender implements Sender {
             if (outputMessage.getContext().getTypeBot() == sender.getBotType()) {
                 logger.info("Found sender with type -  " + sender.getBotType());
                 sender.send(outputMessage);
-                logger.info("message successfully send to person - " + outputMessage.getContext().getPerson()
-                        .getIncomingTelegramMessage().getChat_id());
-                return;
+                if(sender.getBotType() == BotType.TELEGRAM) {
+                    logger.info("message successfully send to telegramPerson - " + outputMessage.getContext().getTelegramPerson()
+                            .getIncomTelegramMessage().getChat_id());
+                    return;
+                }
+                if(sender.getBotType() == BotType.VIBER) {
+                    logger.info("message successfully send to viberPerson - " + outputMessage.getContext().getViberPerson()
+                            .getViberSender().getId());
+                    return;
+                }
+
             }
         }
         logger.warn("Sender not found for type - " + outputMessage.getContext().getTypeBot());

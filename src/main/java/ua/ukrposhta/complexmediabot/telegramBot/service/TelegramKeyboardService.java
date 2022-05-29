@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class KeyboardService {
+public class TelegramKeyboardService {
 
     private final BotLogger logger = BotLogger.getLogger(LoggerType.CONSOLE);
     private final BotLogger telegramLogger = TelegramLogger.getLogger(LoggerType.TELEGRAM);
@@ -40,18 +40,18 @@ public class KeyboardService {
     private SaxParserService parser;
     private SaxHandlerService handler;
 
-    public KeyboardService(SaxParserService parser, SaxHandlerService handler) {
+    public TelegramKeyboardService(SaxParserService parser, SaxHandlerService handler) {
         this.parser = parser;
         this.handler = handler;
     }
 
     public CommonKeyboard getCommonKeyboardReply(BotContext context){
 
-        logger.info("START getCommonKeyboardReply method in KeyboardService.class");
-        telegramLogger.info("START getCommonKeyboardReply method in KeyboardService.class");
+        logger.info("START getCommonKeyboardReply method in TelegramKeyboardService.class");
+        telegramLogger.info("START getCommonKeyboardReply method in TelegramKeyboardService.class");
 
         ButtonEntityList buttonEntityList = getButtonEntityList(context);
-        BotState state = BotState.valueOf(context.getPerson().getCurrentStateName());
+        BotState state = BotState.valueOf(context.getTelegramPerson().getCurrentStateName());
 
         switch (state){
             case END:
@@ -66,7 +66,7 @@ public class KeyboardService {
                 }});
 
             case GOOD_DAY:
-                if(!context.getPerson().isActivity()) {
+                if(!context.getTelegramPerson().isActivity()) {
                     return buildCommonKeyboardReply(new ArrayList<ButtonEntity>() {{
                         add(getCommonButton(ButtonType.REQUEST, buttonEntityList));
                         add(getCommonButton(ButtonType.END, buttonEntityList));
@@ -83,7 +83,7 @@ public class KeyboardService {
                         add(getCommonButton(ButtonType.END, buttonEntityList));
                     }});
             default:
-                if(context.getPerson().getIncomingTelegramMessage().getLanguageCode().equalsIgnoreCase("unknown")) {
+                if(context.getTelegramPerson().getIncomTelegramMessage().getLanguageCode().equalsIgnoreCase("unknown")) {
                     return buildCommonKeyboardReply(new ArrayList<ButtonEntity>() {{
                         add(getCommonButton(ButtonType.END_WORK, buttonEntityList));
                     }});
@@ -97,11 +97,11 @@ public class KeyboardService {
 
     public InlineKeyboardMarkup getCommonKeyboardInline(BotContext context) {
 
-        logger.info("START getCommonKeyboardInline method in KeyboardService.class");
-        telegramLogger.info("START getCommonKeyboardInline method in KeyboardService.class");
+        logger.info("START getCommonKeyboardInline method in TelegramKeyboardService.class");
+        telegramLogger.info("START getCommonKeyboardInline method in TelegramKeyboardService.class");
 
         ButtonEntityList buttonEntityList = getButtonEntityList(context);
-        BotState state = BotState.valueOf(context.getPerson().getCurrentStateName());
+        BotState state = BotState.valueOf(context.getTelegramPerson().getCurrentStateName());
 
         switch (state) {
             case PHONE:
@@ -158,10 +158,10 @@ public class KeyboardService {
             while (inlineRows.get(index).size() < MAX_BUTTONS_COUNT_IN_ROW && buttonNameList.size() != count) {
                 ButtonEntity btn = buttonNameList.get(count);
                 InlineKeyboardButton inlineBtn = new InlineKeyboardButton();
-                inlineBtn.setText(btn.getTxt() + " " + context.getPerson().getIncomingTelegramMessage().getLastName() + " " +
-                        context.getPerson().getIncomingTelegramMessage().getFirstName() + " ?");
-                inlineBtn.setCallbackData(context.getPerson().getIncomingTelegramMessage().getLastName() + " " +
-                        context.getPerson().getIncomingTelegramMessage().getFirstName());
+                inlineBtn.setText(btn.getTxt() + " " + context.getTelegramPerson().getIncomTelegramMessage().getLastName() + " " +
+                        context.getTelegramPerson().getIncomTelegramMessage().getFirstName() + " ?");
+                inlineBtn.setCallbackData(context.getTelegramPerson().getIncomTelegramMessage().getLastName() + " " +
+                        context.getTelegramPerson().getIncomTelegramMessage().getFirstName());
                 inlineRows.get(index).add(inlineBtn);
                 count++;
             }
@@ -177,6 +177,6 @@ public class KeyboardService {
         handlerForButtons.setBotType(BotType.TELEGRAM.name());
 
         return (ButtonEntityList) parser.getParser(ParserHandlerType.BUTTON)
-                .getObjectExchangeFromXML(context.getPerson().getButtonPath(), handlerForButtons);
+                .getObjectExchangeFromXML(context.getTelegramPerson().getButtonPath(), handlerForButtons);
     }
 }

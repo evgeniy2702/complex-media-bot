@@ -1,6 +1,6 @@
 package ua.ukrposhta.complexmediabot.bot;
 
-import ua.ukrposhta.complexmediabot.telegramBot.message.OutputMessage;
+import ua.ukrposhta.complexmediabot.model.OutputMessage;
 import ua.ukrposhta.complexmediabot.utils.exception.SenderException;
 
 /**

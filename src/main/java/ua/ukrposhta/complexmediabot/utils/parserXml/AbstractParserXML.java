@@ -28,6 +28,8 @@ public class AbstractParserXML<T , R extends AbstractHandlerXml> {
 
     private BotLogger telegramTelegram = TelegramLogger.getLogger(LoggerType.TELEGRAM);
 
+    private BotLogger viberTelegram = TelegramLogger.getLogger(LoggerType.VIBER);
+
     @SuppressWarnings("unchecked")
     public T getObjectExchangeFromXML(String uri, R handler){
         consoleLogger.info("----------------------------------------------------------------");
@@ -40,6 +42,7 @@ public class AbstractParserXML<T , R extends AbstractHandlerXml> {
             parser.parse(xmlFile, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             telegramTelegram.error("AbstractParserXML.class ERROR : " + e.getMessage() + "/n CAUSE : " + e.getCause());
+            viberTelegram.error("AbstractParserXML.class ERROR : " + e.getMessage() + "/n CAUSE : " + e.getCause());
         }
 
         return (T) handler.getListOfEntities();
