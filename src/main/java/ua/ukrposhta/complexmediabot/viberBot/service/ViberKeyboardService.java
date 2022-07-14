@@ -1,4 +1,4 @@
-package ua.ukrposhta.complexmediabot.viberBot.servic;
+package ua.ukrposhta.complexmediabot.viberBot.service;
 
 
 import org.springframework.stereotype.Service;

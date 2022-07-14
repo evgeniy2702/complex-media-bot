@@ -13,6 +13,7 @@ import ua.ukrposhta.complexmediabot.viberBot.entityUser.ViberPersonEntity;
  * This class describe the current context of user and bot. It consist from
  * - type of bot
  * - telegram bot
+ * - viber bot
  * - user
  * - string value of input
  */

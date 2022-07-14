@@ -26,7 +26,7 @@ import ua.ukrposhta.complexmediabot.utils.type.ButtonType;
 import ua.ukrposhta.complexmediabot.utils.type.LoggerType;
 import ua.ukrposhta.complexmediabot.utils.type.ParserHandlerType;
 import ua.ukrposhta.complexmediabot.viberBot.entityUser.ViberPersonEntity;
-import ua.ukrposhta.complexmediabot.viberBot.servic.ViberKeyboardService;
+import ua.ukrposhta.complexmediabot.viberBot.service.ViberKeyboardService;
 
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
