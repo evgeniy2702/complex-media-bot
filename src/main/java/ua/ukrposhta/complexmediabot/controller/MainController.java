@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ua.ukrposhta.complexmediabot.model.user.PersonEntity;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -52,7 +54,7 @@ public class MainController {
         this.objectMapper = objectMapper;
     }
 
-    @PostMapping(value = {"telegram",""})
+    @PostMapping(value = {"telegram"})
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<?> receiveTelegramUpdate(@RequestBody Update update ) throws JsonProcessingException {
         consoleLogger.info("START receiveTelegramUpdate.method of MainController.class");
@@ -62,7 +64,8 @@ public class MainController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = {"viber"}, produces = "application/json")
+    @Async
+    @PostMapping(value = {"viber", ""}, produces = "application/json")
     public ResponseEntity<?> receiveViberUpdate(@RequestBody String message,
                                      @RequestHeader("X-Viber-Content-Signature") String serverSideSignature) throws IOException, ExecutionException, InterruptedException {
         consoleLogger.info("START receiveViberUpdate.method of MainController.class");
@@ -81,7 +84,14 @@ public class MainController {
 
             } else if (event != null && "message".equals(event.textValue())) {
 
-                viberIncomingMessageHandler.processingIncomingMessage(json, persons);
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        viberIncomingMessageHandler.processingIncomingMessage(json, persons);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                    return ResponseEntity.ok().build();
+                });
 
             } else {
                 log.warn("Received unprocessed event from viber - {}", event);

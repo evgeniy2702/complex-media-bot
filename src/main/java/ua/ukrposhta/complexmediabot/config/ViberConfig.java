@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import ua.ukrposhta.complexmediabot.bot.BotViber;
 
 import javax.annotation.Nullable;
@@ -40,6 +41,9 @@ public class ViberConfig {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private WebClient webClient;
+
     @Bean
     public BotViber viberBot() {
         BotProfile profile = new BotProfile(viberBotName, avatar);
@@ -50,7 +54,7 @@ public class ViberConfig {
         bot.setAvatar(avatar);
         bot.setViberBotUrl(viberBotUrl);
         bot.setRestTemplate(restTemplate);
-        log.info("Bot successfully initialized {}, {}, {}, {}", viberBotName, viberBotToken, viberWebhookPath, env.getActiveProfiles()[0]);
+        log.info("Bot Viber successfully initialized {}, {}, {}, {}", viberBotName, viberBotToken, viberWebhookPath, env.getActiveProfiles()[0]);
         return bot;
     }
 

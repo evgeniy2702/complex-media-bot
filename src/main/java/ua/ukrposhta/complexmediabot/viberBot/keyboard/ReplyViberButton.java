@@ -1,6 +1,7 @@
 package ua.ukrposhta.complexmediabot.viberBot.keyboard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import lombok.ToString;
 
 /**
@@ -10,6 +11,7 @@ import lombok.ToString;
  * This is class for create keyboard and fill it by buttons according state of user .
  */
 
+@Getter
 @ToString(of={"actionType","actionBody"},callSuper = true)
 public class ReplyViberButton extends ViberButton {
     @JsonProperty("ActionType")

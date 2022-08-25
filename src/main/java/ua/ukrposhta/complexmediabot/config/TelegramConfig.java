@@ -52,7 +52,7 @@ public class TelegramConfig {
             options.setProxyHost(proxyHost);
             options.setProxyHost(proxyPort);
         }
-        log.info("Bot successfully initialized {}, {}, {}, {}", telegramBotName, telegramBotToken, telegramWebhookPath, env.getActiveProfiles()[0]);
+        log.info("Bot Telegram successfully initialized {}, {}, {}, {}", telegramBotName, telegramBotToken, telegramWebhookPath, env.getActiveProfiles()[0]);
         return bot;
     }
 }

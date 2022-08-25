@@ -1,6 +1,7 @@
 package ua.ukrposhta.complexmediabot.viberBot.keyboard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
  */
 
 @ToString(of = {"type","defaultHeight","buttons"})
+@Getter
 public class ViberKeyboard {
     @JsonProperty("Type")
     private final String type = "keyboard";

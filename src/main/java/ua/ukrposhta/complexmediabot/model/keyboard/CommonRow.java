@@ -1,6 +1,7 @@
 package ua.ukrposhta.complexmediabot.model.keyboard;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import java.util.TreeSet;
  */
 
 @Getter
+@Setter
 @ToString
 public class CommonRow implements Iterable<CommonButton> {
 

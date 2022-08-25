@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping({"/Complex-Media-Bot/","/"})
+@RequestMapping({"Complex-Media-Bot/",""})
 public class DebugController {
 
-    @GetMapping("")
+    @GetMapping("debug")
     public String getDebugMessageGet(){
         return "<center><br>HELLO DEBUG! COMPLEX_MEDIA_BOT is WORKING!</br></center>";
     }

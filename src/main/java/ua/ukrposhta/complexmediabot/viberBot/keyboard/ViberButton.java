@@ -1,6 +1,7 @@
 package ua.ukrposhta.complexmediabot.viberBot.keyboard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -12,6 +13,7 @@ import lombok.ToString;
  */
 
 @Setter
+@Getter
 @ToString
 public abstract class ViberButton {
     @JsonProperty("Columns")

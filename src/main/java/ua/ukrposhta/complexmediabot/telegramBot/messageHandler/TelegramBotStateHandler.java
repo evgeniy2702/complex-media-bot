@@ -89,11 +89,11 @@ public class TelegramBotStateHandler {
         OutputMessage outputMessage;
         BotState state = BotState.valueOf(context.getTelegramPerson().getCurrentStateName());
 
+        telegramLogger.info("BotStateHandler.class before CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
+        telegramLogger.info("BotStateHandler.class before PrevState is : " + context.getTelegramPerson().getPrevStateName());
+
         switch (state){
             case GOOD_DAY:
-                telegramLogger.info("BotStateHandler.class CurrentState is : " + BotState.GOOD_DAY.name());
-                telegramLogger.info("BotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("BotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 messageEntity = getMessageByCurrentStateMinusOne(messageEntityList, context);
                 outputMessage = makeOutputMessage(messageEntity, keyboard, context);
@@ -107,9 +107,6 @@ public class TelegramBotStateHandler {
 
                 break;
             case LANGUAGE:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.LANGUAGE.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 messageEntity = getMessageByCurrentStatePlusTwo(messageEntityList, context);
                 outputMessage = makeOutputMessage(messageEntity, keyboard, context);
@@ -118,25 +115,16 @@ public class TelegramBotStateHandler {
 
                 break;
             case SELECT:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.SELECT.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 handlerOfError(messageEntityList, errorEntityList, buttonEntityList, keyboard, context, bot);
 
                 break;
             case MEDIA:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.MEDIA.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 handlerOfError(messageEntityList, errorEntityList, buttonEntityList, keyboard, context, bot);
                 break;
 
             case NAME_SURNAME:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.NAME_SURNAME.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 context.getTelegramPerson().setMediaName(update.getMessage().getText());
 
@@ -147,9 +135,6 @@ public class TelegramBotStateHandler {
                 break;
 
             case PHONE:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.PHONE.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 if(!hasCallbackDataOnName_Surname(update, context)){
                     context.getTelegramPerson().setName_surname(update.getMessage().getText());
@@ -167,9 +152,6 @@ public class TelegramBotStateHandler {
                 }
                 break;
             case EMAIL:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.EMAIL.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 pattern = Pattern.compile("^\\+380[0-9]{2} [0-9]{3} [0-9]{2} [0-9]{2}$");
                 matcher = pattern.matcher(update.getMessage().getText());
@@ -193,9 +175,6 @@ public class TelegramBotStateHandler {
                 }
                 break;
             case SUBJECT:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.SUBJECT.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 pattern = Pattern.compile("^([A-Za-z0-9_-]+\\.)*[A-Za-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,3}$");
                 matcher = pattern.matcher(update.getMessage().getText());
@@ -216,9 +195,6 @@ public class TelegramBotStateHandler {
                 break;
 
             case WE_CONTACT:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.WE_CONTACT.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 context.getTelegramPerson().setSubject(update.getMessage().getText());
                 messageEntity = getMessageByCurrentState(messageEntityList, context);
@@ -231,9 +207,6 @@ public class TelegramBotStateHandler {
                 break;
 
             case END:
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + BotState.END.name());
-                telegramLogger.info("TelegramBotStateHandler.class CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
-                telegramLogger.info("TelegramBotStateHandler.class PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
                 if (context.getTelegramPerson().isExit()) {
                     context.getTelegramPerson().setActivity(false);
@@ -248,6 +221,9 @@ public class TelegramBotStateHandler {
                 switchLanguage(context.getTelegramPerson());
                 break;
         }
+
+        telegramLogger.info("BotStateHandler.class after CurrentState is : " + context.getTelegramPerson().getCurrentStateName());
+        telegramLogger.info("BotStateHandler.class after PrevState is : " + context.getTelegramPerson().getPrevStateName());
 
         return BotState.valueOf(context.getTelegramPerson().getCurrentStateName());
     }

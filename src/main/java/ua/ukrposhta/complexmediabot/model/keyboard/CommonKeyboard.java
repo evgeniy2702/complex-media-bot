@@ -1,6 +1,7 @@
 package ua.ukrposhta.complexmediabot.model.keyboard;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import ua.ukrposhta.complexmediabot.utils.type.KeyboardType;
 
@@ -15,6 +16,7 @@ import java.util.List;
  */
 
 @Getter
+@Setter
 @ToString(of = {"id", "name"})
 public class CommonKeyboard {
 

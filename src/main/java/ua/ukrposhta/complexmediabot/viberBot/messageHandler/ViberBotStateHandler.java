@@ -92,12 +92,11 @@ public class ViberBotStateHandler {
 
         consoleLogger.info("START handleIncomingMessage method in ViberBotStateHandler.class event: " + event + " ; ");
         viberLogger.info("START handleIncomingMessage method in ViberBotStateHandler.class event: " + event + " ; ");
+        viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
+        viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
         switch (state){
             case GOOD_DAY:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.GOOD_DAY.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 messageEntity = getMessageByCurrentStateMinusOne(messageEntityList, context);
                 outputMessage = makeOutputMessage(messageEntity, keyboard, context);
@@ -111,9 +110,6 @@ public class ViberBotStateHandler {
 
                 break;
             case LANGUAGE:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.LANGUAGE.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 messageEntity = getMessageByCurrentStatePlusTwo(messageEntityList, context);
                 outputMessage = makeOutputMessage(messageEntity, keyboard, context);
@@ -122,25 +118,16 @@ public class ViberBotStateHandler {
 
                 break;
             case SELECT:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.SELECT.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 handlerOfError(messageEntityList, errorEntityList, buttonEntityList, keyboard, context, bot);
 
                 break;
             case MEDIA:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.MEDIA.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 handlerOfError(messageEntityList, errorEntityList, buttonEntityList, keyboard, context, bot);
 
                 break;
             case NAME_SURNAME:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.NAME_SURNAME.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 context.getViberPerson().setMediaName(json.get("message").get("text").textValue());
 
@@ -151,9 +138,6 @@ public class ViberBotStateHandler {
 
                 break;
             case PHONE:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.PHONE.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 context.getViberPerson().setName_surname(json.get("message").get("text").textValue());
 
@@ -164,9 +148,6 @@ public class ViberBotStateHandler {
 
                 break;
             case EMAIL:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.EMAIL.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 pattern = Pattern.compile("^\\+380[0-9]{2} [0-9]{3} [0-9]{2} [0-9]{2}$");
                 matcher = pattern.matcher(json.get("message").get("text").textValue());
@@ -194,9 +175,6 @@ public class ViberBotStateHandler {
                 }
                 break;
             case SUBJECT:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.SUBJECT.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 pattern = Pattern.compile("^([A-Za-z0-9_-]+\\.)*[A-Za-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,3}$");
                 matcher = pattern.matcher(json.get("message").get("text").textValue());
@@ -220,9 +198,6 @@ public class ViberBotStateHandler {
                 break;
 
             case WE_CONTACT:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.WE_CONTACT.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 context.getViberPerson().setSubject(json.get("message").get("text").textValue());
                 messageEntity = getMessageByCurrentState(messageEntityList, context);
@@ -234,9 +209,6 @@ public class ViberBotStateHandler {
                 bot.send(outputMessage);
                 break;
             case END:
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + BotState.END.name());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; CurrentState is : " + context.getViberPerson().getCurrentStateName());
-                viberLogger.info("ViberBotStateHandler.class event: " + event + " ; PrevState is : " + context.getViberPerson().getPrevStateName());
 
                 if (context.getViberPerson().isExit()) {
                     context.getViberPerson().setActivity(false);
