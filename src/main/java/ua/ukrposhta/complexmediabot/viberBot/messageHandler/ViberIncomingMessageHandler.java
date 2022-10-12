@@ -66,11 +66,11 @@ public class ViberIncomingMessageHandler {
     @Value("${path.xml.english.error}")
     private String pathXmlEnglishError;
 
-    @Value("${viber.piar.unit.first.receiver}")
-    private String firstReceiverPiarUnit;
-
-    @Value("${viber.piar.unit.second.receiver}")
-    private String secondReceiverPiarUnit;
+//    @Value("${viber.piar.unit.first.receiver}")
+//    private String firstReceiverPiarUnit;
+//
+//    @Value("${viber.piar.unit.second.receiver}")
+//    private String secondReceiverPiarUnit;
 
     @Value("${spring.profiles.active}")
     private String activeProfile;
@@ -105,7 +105,8 @@ public class ViberIncomingMessageHandler {
         this.objectMapper = objectMapper;
     }
 
-    public void processingIncomingMessage(JsonNode json, Map<String, PersonEntity> personMap) throws JsonProcessingException {
+    public void processingIncomingMessage(JsonNode json, Map<String, PersonEntity> personMap,
+                                          Map<String, String> piars) throws JsonProcessingException {
         console.info("START processingIncomingMessage method in ViberIncomingMessageHandler.class");
 
         BotState state;
@@ -137,6 +138,7 @@ public class ViberIncomingMessageHandler {
             viberLogger.info("ViberIncomingMessageHandler.class event = " + json.get("event").textValue() + "; STATE update.hasMessage() : " + state);
 
             personMap.put(viberPerson.getViberSender().getId(), viberPerson);
+            viberBot.getViberPersons().put(viberPerson.getViberSender().getId(), viberPerson);
 
         }
         if("unsubscribed".equals(json.get("event").textValue())) {
@@ -146,6 +148,7 @@ public class ViberIncomingMessageHandler {
 
             String userId = json.get("user_id").textValue();
             personMap.remove(userId);
+            viberBot.getViberPersons().remove(userId);
         }
         if(json.get("message") != null){
 
@@ -183,14 +186,14 @@ public class ViberIncomingMessageHandler {
 
             try {
 
-                if (!viberPerson.getViberSender().getId().equals(firstReceiverPiarUnit) ||
-                        !viberPerson.getViberSender().getId().equals(secondReceiverPiarUnit)) {
+                if (!piars.containsKey(viberPerson.getViberSender().getId())) {
 
                     state = viberBotStateHandler.handleIncomingMessage(json,context,viberBot);
 
                     console.info("STATE event = " + json.get("event").textValue() + "; state " + state);
 
                     personMap.put(viberPerson.getViberSender().getId(), viberPerson);
+                    viberBot.getViberPersons().put(viberPerson.getViberSender().getId(), viberPerson);
                 }
 
                 viberLogger.info("ViberIncomingMessageHandler.class event = " + json.get("event").textValue() + "; user : " + viberPerson.toString());
@@ -202,13 +205,15 @@ public class ViberIncomingMessageHandler {
                         (viberPerson.getCurrentStateName().equals(BotState.END.name()))) {
                     numberOfCellExcelSheet = googleSheetsLive.readNumberOfCellExcelSheetFromExcelSheet(context, numberOfCellExcelSheet);
                     if (!this.activeProfile.equalsIgnoreCase("dev")) {
-                        sendNewRequestForPiar(context, firstReceiverPiarUnit);
-                        sendNewRequestForPiar(context, secondReceiverPiarUnit);
+                        for(String key : piars.keySet()) {
+                            sendNewRequestForPiar(context, key);
+
+                            viberLogger.info("SEND ViberIncomingMessageHandler.class event = " + json.get("event").textValue() + " info about request ID : " + key);
+                        }
                     }
 
-                    viberLogger.info("SEND ViberIncomingMessageHandler.class event = " + json.get("event").textValue() + " info about request firstChatIdPiarUnit : " + firstReceiverPiarUnit + " | secondChatIdPiarUnit : " +
-                            secondReceiverPiarUnit);
                     personMap.remove(viberPerson.getViberSender().getId());
+                    viberBot.getViberPersons().remove(viberPerson.getViberSender().getId());
                     viberLogger.info("ViberIncomingMessageHandler.class event = " + json.get("event").textValue() + " size of cache language_codeList : " +
                             language_codeList.size());
                 }

@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ua.ukrposhta.complexmediabot.telegramBot.messageHandler.TelegramIncomingMessageHandler;
+import ua.ukrposhta.complexmediabot.utils.TxtFileScanner;
 import ua.ukrposhta.complexmediabot.viberBot.messageHandler.ViberIncomingMessageHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,8 @@ class MainControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Value("${viberbot.token}")
     private String token;
@@ -43,18 +46,19 @@ class MainControllerTest {
     private TelegramIncomingMessageHandler telegramIncomingMessageHandler;
     @MockBean
     private ViberIncomingMessageHandler viberIncomingMessageHandler;
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockBean
     private RestTemplate restTemplate;
+
+    @MockBean
+    private TxtFileScanner scanner;
 
     private MainController mainController;
 
     @BeforeEach
     void setUp(){
         mainController = new MainController(telegramIncomingMessageHandler,
-                viberIncomingMessageHandler, objectMapper);
+                viberIncomingMessageHandler,
+                objectMapper, scanner);
     }
 
 

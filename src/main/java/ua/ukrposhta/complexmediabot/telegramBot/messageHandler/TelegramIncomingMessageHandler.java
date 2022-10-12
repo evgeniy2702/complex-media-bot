@@ -66,11 +66,11 @@ public class TelegramIncomingMessageHandler {
     @Value("${path.xml.english.error}")
     private String pathXmlEnglishError;
 
-    @Value("${telegram.piar.unit.first.chatId}")
-    private String firstChatIdPiarUnit;
-
-    @Value("${telegram.piar.unit.second.chatId}")
-    private String secondChatIdPiarUnit;
+//    @Value("${telegram.piar.unit.first.chatId}")
+//    private String firstChatIdPiarUnit;
+//
+//    @Value("${telegram.piar.unit.second.chatId}")
+//    private String secondChatIdPiarUnit;
 
     @Value("${spring.profiles.active}")
     private String activeProfile;
@@ -102,7 +102,9 @@ public class TelegramIncomingMessageHandler {
         }};
     }
 
-    public void processingIncomingMessage(Update update, Map<String, PersonEntity> personMap) throws JsonProcessingException {
+    public void processingIncomingMessage(Update update,
+                                          Map<String, PersonEntity> personMap,
+                                          Map<String, String> piars) throws JsonProcessingException {
         logger.info("START processingIncomingMessage method in TelegramIncomingMessageHandler.class");
 
         if (update.hasMessage()) {
@@ -155,14 +157,13 @@ public class TelegramIncomingMessageHandler {
 
                 try {
 
-                    if (!telegramPerson.getIncomTelegramMessage().getChat_id().equals(firstChatIdPiarUnit) ||
-                            !telegramPerson.getIncomTelegramMessage().getChat_id().equals(secondChatIdPiarUnit)) {
+                    if (!piars.containsKey(telegramPerson.getIncomTelegramMessage().getChat_id())) {
 
                         state = stateHandler.handleIncomingMessage(update, context, telegramBot);
 
                         logger.info("STATE update.hasMessage() : " + state);
                         personMap.put(String.valueOf(chat_id), telegramPerson);
-
+                        telegramBot.getTelegramPersons().put(String.valueOf(chat_id), telegramPerson);
                     }
 
                     telegramLogger.info("TelegramIncomingMessageHandler.class user : " + telegramPerson.toString());
@@ -171,13 +172,13 @@ public class TelegramIncomingMessageHandler {
                             (telegramPerson.getCurrentStateName().equals(BotState.END.name()))) {
                         numberOfCellExcelSheet = googleSheetsLive.readNumberOfCellExcelSheetFromExcelSheet(context, numberOfCellExcelSheet);
                         if (!this.activeProfile.equalsIgnoreCase("dev")) {
-                            sendNewRequestForPiar(context, firstChatIdPiarUnit);
-                            sendNewRequestForPiar(context, secondChatIdPiarUnit);
+                            for(String key : piars.keySet()) {
+                                sendNewRequestForPiar(context, key);
+                                telegramLogger.info("SEND TelegramIncomingMessageHandler.class info about request USER_ID : " + key);
+                            }
                         }
-
-                        telegramLogger.info("SEND TelegramIncomingMessageHandler.class info about request firstChatIdPiarUnit : " + firstChatIdPiarUnit + " | secondChatIdPiarUnit : " +
-                                secondChatIdPiarUnit);
                         personMap.remove(String.valueOf(chat_id));
+                        telegramBot.getTelegramPersons().remove(String.valueOf(chat_id), telegramPerson);
                         telegramLogger.info("TelegramIncomingMessageHandler.class size of cache language_codeList : " +
                                 language_codeList.size());
                     }

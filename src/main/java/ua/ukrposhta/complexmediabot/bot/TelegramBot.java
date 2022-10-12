@@ -2,6 +2,8 @@ package ua.ukrposhta.complexmediabot.bot;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -16,11 +18,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+import ua.ukrposhta.complexmediabot.model.OutputMessage;
 import ua.ukrposhta.complexmediabot.model.keyboard.CommonButton;
 import ua.ukrposhta.complexmediabot.model.keyboard.CommonKeyboard;
 import ua.ukrposhta.complexmediabot.model.keyboard.CommonRow;
 import ua.ukrposhta.complexmediabot.telegramBot.entityUser.TelegramPersonEntity;
-import ua.ukrposhta.complexmediabot.model.OutputMessage;
 import ua.ukrposhta.complexmediabot.utils.exception.SenderException;
 import ua.ukrposhta.complexmediabot.utils.logger.BotLogger;
 import ua.ukrposhta.complexmediabot.utils.logger.ConsoleLogger;
@@ -41,8 +43,9 @@ import java.util.Map;
  * It sets the logic of send message in to Telegram server
  */
 
-
+@NoArgsConstructor
 @Setter
+@Getter
 public class TelegramBot extends TelegramWebhookBot implements TypedSender {
 
     private String telegramBotName;
@@ -50,7 +53,8 @@ public class TelegramBot extends TelegramWebhookBot implements TypedSender {
     private String telegramBotToken;
 
     public static final int MAX_ROWS_COUNT = 2;
-    private Map<String, TelegramPersonEntity> persons = new HashMap<>();
+    private Map<String, TelegramPersonEntity> telegramPersons = new HashMap<>();
+    private Map<String, String> piars = new HashMap<>();
     private BotLogger consoleLogger = ConsoleLogger.getLogger(LoggerType.CONSOLE);
     private BotLogger telegramLogger = TelegramLogger.getLogger(LoggerType.TELEGRAM);
 
@@ -185,14 +189,14 @@ public class TelegramBot extends TelegramWebhookBot implements TypedSender {
                         HttpStatus.FORBIDDEN.value());
                 telegramLogger.info("ERROR in handlerException : " + HttpStatus.FORBIDDEN.getReasonPhrase() + " " +
                         HttpStatus.FORBIDDEN.value());
-                persons.remove(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id());
+                telegramPersons.remove(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id());
             } else if(errorCode == HttpStatus.BAD_REQUEST.value() &&
                     errorString.equals("Bad Request: chat not found")){
                 consoleLogger.info("ERROR in handlerException : " + HttpStatus.BAD_REQUEST.getReasonPhrase() + " " +
                         HttpStatus.BAD_REQUEST.value());
                 telegramLogger.info("ERROR in handlerException : " + HttpStatus.BAD_REQUEST.getReasonPhrase() + " " +
                         HttpStatus.BAD_REQUEST.value());
-                persons.remove(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id());
+                telegramPersons.remove(message.getContext().getTelegramPerson().getIncomTelegramMessage().getChat_id());
             }
         }
     }

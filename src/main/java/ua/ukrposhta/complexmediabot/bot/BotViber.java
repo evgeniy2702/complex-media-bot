@@ -21,10 +21,13 @@ import ua.ukrposhta.complexmediabot.utils.type.BotType;
 import ua.ukrposhta.complexmediabot.utils.type.LoggerType;
 import ua.ukrposhta.complexmediabot.utils.type.ViberTypeMessage;
 import ua.ukrposhta.complexmediabot.viberBot.entityUser.OutViberSender;
+import ua.ukrposhta.complexmediabot.viberBot.entityUser.ViberPersonEntity;
 import ua.ukrposhta.complexmediabot.viberBot.message.ViberOutMessage;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -38,8 +41,11 @@ public class BotViber extends ViberBot implements TypedSender {
     private String viberBotUrl;
     private RestTemplate restTemplate;
 
+    private Map<String, ViberPersonEntity> viberPersons = new HashMap<>();
+    private Map<String, String> piars = new HashMap<>();
     private BotLogger consoleLogger = ConsoleLogger.getLogger(LoggerType.CONSOLE);
     private BotLogger viberLogger = ViberLogger.getLogger(LoggerType.VIBER);
+
 
     public BotViber(BotProfile profile, String viberWebhookPath) {
         super(profile, viberWebhookPath);
